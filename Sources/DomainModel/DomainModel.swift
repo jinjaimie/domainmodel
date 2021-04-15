@@ -73,6 +73,49 @@ public class Job {
         case Hourly(Double)
         case Salary(UInt)
     }
+    var title: String
+        var type: JobType
+        
+        init(title t: String, type ty: JobType) {
+            title = t
+            type = ty
+        }
+        
+        func calculateIncome(_ t: Int) -> Int {
+            switch type {
+            case .Hourly(let amount):
+                return Int(round(amount * Double(t)))
+            case .Salary(let amount):
+                return Int(amount)
+            }
+        }
+        
+        func raise(byPercent p: Double) {
+            switch type {
+            case .Hourly(let amount):
+                type = JobType.Hourly(amount * p)
+            case .Salary(let amount):
+                type = JobType.Salary(amount * UInt(round(p)))
+            }
+        }
+        
+        func raise(byAmount a: Double) {
+            switch type {
+            case .Hourly(let amount):
+                type = JobType.Hourly(amount + a)
+            case .Salary(let amount):
+                type = JobType.Salary(amount + UInt(round(a)))
+            }
+        }
+        
+        func raise(byAmount a: Int) {
+            switch type {
+            case .Hourly(let amount):
+                type = JobType.Hourly(amount + Double(a))
+            case .Salary(let amount):
+                type = JobType.Salary(amount + UInt(a))
+            }
+        }
 }
 
 ////////////////////////////////////
