@@ -27,41 +27,22 @@ public struct Money {
     }
     
     func convert(_ c: String) -> Money {
-        let exchangeRate = ["GBP": 0.5/2, "EUR": 1.5/2, "CAN": 1.25/4]
-        var USDamount = Double(amount)
-        if (self.currency != "USD") {
-            USDamount = Double(self.amount) / exchangeRate[self.currency]!
-        }
-        let newAmount = Int(round(USDamount * exchangeRate[c]!))
-        return Money(amount: newAmount, currency: c)
+        let exchangeRate = ["GBP": 0.5, "EUR": 1.5, "CAN": 1.25, "USD": 1.0]
+        let newAmount = Double(self.amount) / exchangeRate[self.currency]! * exchangeRate[c]!
+        return Money(amount: Int(round(newAmount)), currency: c)
     }
     
     func add(_ m: Money) -> Money {
-        let exchangeRate = ["GBP": 0.5/2, "EUR": 1.5/2, "CAN": 1.25/4]
-        var CUSDamount = Double(self.amount)
-        if (self.currency != "USD") {
-            CUSDamount = Double(self.amount) / exchangeRate[self.currency]!
-        }
-        var NUSDamount = Double(m.amount)
-        if (m.currency != "USD") {
-            NUSDamount = Double(m.amount) / exchangeRate[m.currency]!
-        }
-        let newAmount = Int(round((CUSDamount + NUSDamount) * exchangeRate[m.currency]!))
+        let currAmount = convert(m.currency)
+        let newAmount = currAmount.amount + m.amount
         return Money(amount: newAmount, currency: m.currency)
     }
     
     func subtract(_ m: Money) -> Money {
-        let exchangeRate = ["GBP": 0.5/2, "EUR": 1.5/2, "CAN": 1.25/4]
-        var CUSDamount = Double(self.amount)
-        if (self.currency != "USD") {
-            CUSDamount = Double(self.amount) / exchangeRate[self.currency]!
-        }
-        var NUSDamount = Double(m.amount)
-        if (m.currency != "USD") {
-            NUSDamount = Double(m.amount) / exchangeRate[m.currency]!
-        }
-        let newAmount = Int(round((CUSDamount - NUSDamount) * exchangeRate[m.currency]!))
+        let currAmount = convert(m.currency)
+        let newAmount = currAmount.amount - m.amount
         return Money(amount: newAmount, currency: m.currency)
+
     }
 }
 
@@ -93,9 +74,9 @@ public class Job {
         func raise(byPercent p: Double) {
             switch type {
             case .Hourly(let amount):
-                type = JobType.Hourly(amount * p)
+                type = JobType.Hourly(amount + (amount * p))
             case .Salary(let amount):
-                type = JobType.Salary(amount * UInt(round(p)))
+                type = JobType.Salary(amount + UInt(round(Double(amount) * p)))
             }
         }
         
@@ -123,10 +104,26 @@ public class Job {
 //
 public class Person {
     var firstName: String
-        var lastName: String
-        var age: Int
-        var job: Job?
-        var spouse: Person?
+    var lastName: String
+    var age: Int
+    var _job : Job? = nil
+          open var job : Job? {
+            get { return self._job }
+            set(value) {
+              if self.age > 20 {
+                self._job = value
+              }
+            }
+          }
+    var _spouse: Person?  = nil
+    open var spouse : Person? {
+        get { return self._spouse }
+      set(value) {
+        if self.age > 20 {
+          self._spouse = value
+        }
+      }
+    }
         
         init(firstName f: String, lastName l: String, age a: Int) {
             firstName = f
@@ -136,13 +133,13 @@ public class Person {
         
         func toString() -> String {
             if spouse !== nil && job !== nil {
-                return "[Person: firstName:\(firstName) lastName:\(lastName) job:\(job!.title) spouse:\(spouse!.firstName)]"
+                return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:\(job!.title) spouse:\(spouse!.firstName)]"
             } else if spouse !== nil && job === nil {
-                return "[Person: firstName:\(firstName) lastName:\(lastName) job:nil spouse:\(spouse!.firstName)]"
+                return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:nil spouse:\(spouse!.firstName)]"
             } else if spouse === nil && job !== nil {
-                return "[Person: firstName:\(firstName) lastName:\(lastName) job:\(job!.title) spouse:nil]"
+                return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:\(job!.title) spouse:nil]"
             } else {
-                return "[Person: firstName:\(firstName) lastName:\(lastName) job:nil spouse:nil]"
+                return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:nil spouse:nil]"
             }
         }
 }
@@ -151,4 +148,33 @@ public class Person {
 // Family
 //
 public class Family {
+    var members: [Person] = []
+        
+        init(spouse1: Person, spouse2: Person) {
+            if (spouse1.spouse === nil && spouse2.spouse === nil) {
+                spouse1.spouse = spouse2
+                spouse2.spouse = spouse1
+                members = [spouse1, spouse2]
+            } else {
+                print("someone is already married!")
+            }
+        }
+        
+        func haveChild(_ c: Person) -> Bool {
+            if (members[0].age > 21 || members[1].age > 21) {
+                members.append(c)
+                return true
+            }
+            return false
+        }
+        
+        func householdIncome() -> Int {
+            var totalIncome = 0
+            for m in members {
+                if (m.job !== nil) {
+                    totalIncome += m.job!.calculateIncome(2000);
+                }
+            }
+            return totalIncome
+        }
 }
