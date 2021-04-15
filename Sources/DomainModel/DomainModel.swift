@@ -122,6 +122,29 @@ public class Job {
 // Person
 //
 public class Person {
+    var firstName: String
+        var lastName: String
+        var age: Int
+        var job: Job?
+        var spouse: Person?
+        
+        init(firstName f: String, lastName l: String, age a: Int) {
+            firstName = f
+            lastName = l
+            age = a
+        }
+        
+        func toString() -> String {
+            if spouse !== nil && job !== nil {
+                return "[Person: firstName:\(firstName) lastName:\(lastName) job:\(job!.title) spouse:\(spouse!.firstName)]"
+            } else if spouse !== nil && job === nil {
+                return "[Person: firstName:\(firstName) lastName:\(lastName) job:nil spouse:\(spouse!.firstName)]"
+            } else if spouse === nil && job !== nil {
+                return "[Person: firstName:\(firstName) lastName:\(lastName) job:\(job!.title) spouse:nil]"
+            } else {
+                return "[Person: firstName:\(firstName) lastName:\(lastName) job:nil spouse:nil]"
+            }
+        }
 }
 
 ////////////////////////////////////
