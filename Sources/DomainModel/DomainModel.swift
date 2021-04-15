@@ -55,48 +55,57 @@ public class Job {
         case Salary(UInt)
     }
     var title: String
-        var type: JobType
-        
-        init(title t: String, type ty: JobType) {
-            title = t
-            type = ty
+    var type: JobType
+    
+    init(title t: String, type ty: JobType) {
+        title = t
+        type = ty
+    }
+    
+    func calculateIncome(_ t: Int) -> Int {
+        switch type {
+        case .Hourly(let amount):
+            return Int(round(amount * Double(t)))
+        case .Salary(let amount):
+            return Int(amount)
         }
-        
-        func calculateIncome(_ t: Int) -> Int {
-            switch type {
-            case .Hourly(let amount):
-                return Int(round(amount * Double(t)))
-            case .Salary(let amount):
-                return Int(amount)
-            }
+    }
+    
+    func raise(byPercent p: Double) {
+        switch type {
+        case .Hourly(let amount):
+            type = JobType.Hourly(amount + (amount * p))
+        case .Salary(let amount):
+            type = JobType.Salary(amount + UInt(round(Double(amount) * p)))
         }
-        
-        func raise(byPercent p: Double) {
-            switch type {
-            case .Hourly(let amount):
-                type = JobType.Hourly(amount + (amount * p))
-            case .Salary(let amount):
-                type = JobType.Salary(amount + UInt(round(Double(amount) * p)))
-            }
+    }
+    
+    func raise(byAmount a: Double) {
+        switch type {
+        case .Hourly(let amount):
+            type = JobType.Hourly(amount + a)
+        case .Salary(let amount):
+            type = JobType.Salary(amount + UInt(round(a)))
         }
-        
-        func raise(byAmount a: Double) {
-            switch type {
-            case .Hourly(let amount):
-                type = JobType.Hourly(amount + a)
-            case .Salary(let amount):
-                type = JobType.Salary(amount + UInt(round(a)))
-            }
+    }
+    
+    func raise(byAmount a: Int) {
+        switch type {
+        case .Hourly(let amount):
+            type = JobType.Hourly(amount + Double(a))
+        case .Salary(let amount):
+            type = JobType.Salary(amount + UInt(a))
         }
-        
-        func raise(byAmount a: Int) {
-            switch type {
-            case .Hourly(let amount):
-                type = JobType.Hourly(amount + Double(a))
-            case .Salary(let amount):
-                type = JobType.Salary(amount + UInt(a))
-            }
+    }
+    
+    func convert() {
+        switch type {
+        case .Hourly(let amount):
+            type = JobType.Salary(UInt(round(amount * 2000.0/1000.0) * 1000))
+        case .Salary(let amount):
+            type = JobType.Salary(amount)
         }
+    }
 }
 
 ////////////////////////////////////
@@ -125,23 +134,23 @@ public class Person {
       }
     }
         
-        init(firstName f: String = "", lastName l: String = "", age a: Int) {
-            firstName = f
-            lastName = l
-            age = a
+    init(firstName f: String = "", lastName l: String = "", age a: Int) {
+        firstName = f
+        lastName = l
+        age = a
+    }
+    
+    func toString() -> String {
+        if spouse !== nil && job !== nil {
+            return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:\(job!.title) spouse:\(spouse!.firstName)]"
+        } else if spouse !== nil && job === nil {
+            return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:nil spouse:\(spouse!.firstName)]"
+        } else if spouse === nil && job !== nil {
+            return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:\(job!.title) spouse:nil]"
+        } else {
+            return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:nil spouse:nil]"
         }
-        
-        func toString() -> String {
-            if spouse !== nil && job !== nil {
-                return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:\(job!.title) spouse:\(spouse!.firstName)]"
-            } else if spouse !== nil && job === nil {
-                return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:nil spouse:\(spouse!.firstName)]"
-            } else if spouse === nil && job !== nil {
-                return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:\(job!.title) spouse:nil]"
-            } else {
-                return "[Person: firstName:\(firstName) lastName:\(lastName) age:\(age) job:nil spouse:nil]"
-            }
-        }
+    }
 }
 
 ////////////////////////////////////
@@ -150,31 +159,31 @@ public class Person {
 public class Family {
     var members: [Person] = []
         
-        init(spouse1: Person, spouse2: Person) {
-            if (spouse1.spouse === nil && spouse2.spouse === nil) {
-                spouse1.spouse = spouse2
-                spouse2.spouse = spouse1
-                members = [spouse1, spouse2]
-            } else {
-                print("someone is already married!")
+    init(spouse1: Person, spouse2: Person) {
+        if (spouse1.spouse === nil && spouse2.spouse === nil) {
+            spouse1.spouse = spouse2
+            spouse2.spouse = spouse1
+            members = [spouse1, spouse2]
+        } else {
+            print("someone is already married!")
+        }
+    }
+    
+    func haveChild(_ c: Person) -> Bool {
+        if (members[0].age > 21 || members[1].age > 21) {
+            members.append(c)
+            return true
+        }
+        return false
+    }
+    
+    func householdIncome() -> Int {
+        var totalIncome = 0
+        for m in members {
+            if (m.job !== nil) {
+                totalIncome += m.job!.calculateIncome(2000);
             }
         }
-        
-        func haveChild(_ c: Person) -> Bool {
-            if (members[0].age > 21 || members[1].age > 21) {
-                members.append(c)
-                return true
-            }
-            return false
-        }
-        
-        func householdIncome() -> Int {
-            var totalIncome = 0
-            for m in members {
-                if (m.job !== nil) {
-                    totalIncome += m.job!.calculateIncome(2000);
-                }
-            }
-            return totalIncome
-        }
+        return totalIncome
+    }
 }
