@@ -22,7 +22,7 @@ public struct Money {
         } else {
             amount = 0
             currency = "USD"
-            print("currency not accepted")
+            print("currency not accepted or amount not ")
         }
     }
     
@@ -125,7 +125,7 @@ public class Person {
       }
     }
         
-        init(firstName f: String, lastName l: String, age a: Int) {
+        init(firstName f: String = "", lastName l: String = "", age a: Int) {
             firstName = f
             lastName = l
             age = a
